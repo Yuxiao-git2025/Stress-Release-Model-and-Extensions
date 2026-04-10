@@ -1,0 +1,225 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Main_LSRM</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2026-03-25"><meta name="DC.source" content="Main_LSRM.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Conditional intensity and Practise</a></li><li><a href="#3">MLE-Fitting</a></li><li><a href="#4">Plot-Fitting</a></li><li><a href="#5">RPP-analysis</a></li><li><a href="#6">Or like this:</a></li></ul></div><pre class="codeinput"><span class="comment">% =========================================================================</span>
+<span class="comment">% &gt;&gt; Linked/Coulped Stress Release Model (LSRM) Script</span>
+<span class="comment">% A marked point process in time-stress space with the conditional</span>
+<span class="comment">% intensity function</span>
+<span class="comment">% Modified at: Yu. 2026/03/25</span>
+<span class="comment">% =========================================================================</span>
+<span class="comment">% In the univariate stress release model (SRM), the regional stress level</span>
+<span class="comment">% X(t) increases deterministically between two earthquakes and releases</span>
+<span class="comment">% stochastically as a scalar Markov process;</span>
+<span class="comment">% However, LSRM takes into account interactions among different subregions</span>
+<span class="comment">% due to stress transfer, reflected by the parameter &#952;</span>
+<span class="comment">% =========================================================================</span>
+<span class="comment">% &#952;ij measures the &#64257;xed proportion of stress drop from events, initiated in</span>
+<span class="comment">% the subregion j, which is transferred to the subregion i;</span>
+<span class="comment">% In the simpler parameterisation: Cij&gt;0 means damping (j to i) and</span>
+<span class="comment">% Cij&lt;0 means excitation (j to i); Cij=0 means no interaction between them;</span>
+<span class="comment">% and if C=ones(Nregion), it means stress transfer is equal both the region</span>
+<span class="comment">% so that &#955;1=&#955;2</span>
+<span class="comment">% =========================================================================</span>
+<span class="comment">% Length of params=n^2+2n=n(n+2); Here suppose n=2:</span>
+<span class="keyword">global</span> evalNums
+evalNums=200;
+Nregion=2;
+rng(2025);
+<span class="comment">% Data-components: [time,mag,reg,Mmin]</span>
+time=EventTime;
+mag=EventMag;
+reg=randi([1,Nregion],length(time),1); <span class="comment">% randomly</span>
+Mmin=4;
+</pre><h2 id="2">Conditional intensity and Practise</h2><pre class="codeinput">A = [-2;-2];
+B = [0.01;0.01];
+C=0.5*ones(Nregion);
+C(1,2)=-0.0;
+C(2,1)=-0.0;
+params=LSRM_PackingParam(A,B,C);
+<span class="comment">% AIC0=LSRM_AIC(time,mag,reg,params,Mmin);</span>
+LSRM_PlotResults(LSRM_Estimate(time,mag,reg,params,Mmin),reg,time,mag,Mmin);
+</pre><img vspace="5" hspace="5" src="Main_LSRM_01.png" alt=""> <h2 id="3">MLE-Fitting</h2><pre class="codeinput">[pNew,AICNew]=LSRM_MLE(time,mag,reg,params,Mmin);
+</pre><pre class="codeoutput">                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+    0       9    5.709041e+02    0.000e+00    1.356e+02
+    1      21    5.564388e+02    0.000e+00    1.106e+04    1.023e+00
+    2      36    5.500273e+02    0.000e+00    8.574e+02    4.475e-01
+    3      45    5.438191e+02    0.000e+00    7.851e+02    7.863e-01
+    4      55    5.422647e+02    0.000e+00    1.054e+03    3.101e-01
+    5      66    5.401302e+02    0.000e+00    1.708e+03    5.373e-01
+    6      77    5.399922e+02    0.000e+00    1.827e+03    2.455e-01
+    7      87    5.367216e+02    0.000e+00    2.939e+03    4.128e-01
+    8      96    5.359716e+02    0.000e+00    9.765e+02    5.692e-01
+    9     112    5.356019e+02    0.000e+00    2.450e+02    1.711e-01
+   10     124    5.355893e+02    0.000e+00    2.743e+02    9.823e-02
+   11     135    5.351716e+02    0.000e+00    3.764e+02    1.611e-01
+   12     146    5.342283e+02    0.000e+00    3.987e+02    2.207e-01
+   13     155    5.338691e+02    0.000e+00    3.442e+02    3.289e-01
+   14     167    5.337551e+02    0.000e+00    1.366e+02    8.788e-02
+   15     177    5.336086e+02    0.000e+00    9.392e+01    2.449e-01
+   16     186    5.334089e+02    0.000e+00    2.361e+02    2.138e-01
+   17     195    5.333243e+02    0.000e+00    1.575e+02    1.084e-01
+   18     204    5.332024e+02    0.000e+00    8.705e+01    1.039e-01
+   19     213    5.330952e+02    0.000e+00    1.786e+02    4.609e-02
+   20     222    5.330322e+02    0.000e+00    1.181e+02    3.839e-02
+   21     231    5.329551e+02    0.000e+00    5.452e+01    5.401e-02
+   22     240    5.329256e+02    0.000e+00    1.982e+01    2.026e-02
+   23     249    5.329224e+02    0.000e+00    3.077e+00    1.613e-02
+   24     258    5.329217e+02    0.000e+00    1.500e+00    4.368e-03
+   25     267    5.329217e+02    0.000e+00    2.341e+00    3.054e-03
+   26     276    5.329216e+02    0.000e+00    1.319e-01    1.367e-03
+   27     285    5.329216e+02    0.000e+00    2.346e-01    3.391e-04
+   28     294    5.329216e+02    0.000e+00    2.164e-01    1.090e-04
+   29     303    5.329216e+02    0.000e+00    7.104e-02    2.196e-04
+   30     312    5.329216e+02    0.000e+00    1.532e-02    1.879e-05
+
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+   31     321    5.329216e+02    0.000e+00    1.033e-03    1.464e-05
+
+Local minimum possible. Constraints satisfied.
+
+fmincon stopped because the size of the current step is less than
+the value of the step size tolerance and constraints are 
+satisfied to within the value of the constraint tolerance.
+
+# New parameters
+  &#21015; 1 &#33267; 7
+
+   -2.0623   -1.8634    0.0161    0.0127    0.1388    0.2860    0.7836
+
+  &#21015; 8
+
+    0.8027
+
+</pre><h2 id="4">Plot-Fitting</h2><pre class="codeinput">LSRM_PlotResults(LSRM_Estimate(time,mag,reg,pNew,Mmin),reg,time,mag,Mmin);
+<span class="comment">% AIC=LSRM_AIC(time,mag,reg,pNew,Mmin);</span>
+</pre><img vspace="5" hspace="5" src="Main_LSRM_02.png" alt=""> <h2 id="5">RPP-analysis</h2><pre class="codeinput">[CumInt]=LSRM_Integral_Time(time,mag,reg,pNew,Mmin);
+LSRM_RPP(CumInt,time,reg);
+</pre><img vspace="5" hspace="5" src="Main_LSRM_03.png" alt=""> <h2 id="6">Or like this:</h2><pre class="codeinput">[CumInt]=LSRM_Integral_Region(time,mag,reg,pNew,Mmin);
+LSRM_RPP_Transformed(CumInt,reg);
+</pre><img vspace="5" hspace="5" src="Main_LSRM_04.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% =========================================================================
+% >> Linked/Coulped Stress Release Model (LSRM) Script
+% A marked point process in time-stress space with the conditional 
+% intensity function
+% Modified at: Yu. 2026/03/25
+% =========================================================================
+% In the univariate stress release model (SRM), the regional stress level
+% X(t) increases deterministically between two earthquakes and releases
+% stochastically as a scalar Markov process;
+% However, LSRM takes into account interactions among different subregions
+% due to stress transfer, reflected by the parameter θ
+% =========================================================================
+% θij measures the ﬁxed proportion of stress drop from events, initiated in
+% the subregion j, which is transferred to the subregion i;
+% In the simpler parameterisation: Cij>0 means damping (j to i) and
+% Cij<0 means excitation (j to i); Cij=0 means no interaction between them;
+% and if C=ones(Nregion), it means stress transfer is equal both the region
+% so that λ1=λ2
+% =========================================================================
+% Length of params=n^2+2n=n(n+2); Here suppose n=2: 
+global evalNums
+evalNums=200;
+Nregion=2;
+rng(2025);
+% Data-components: [time,mag,reg,Mmin]
+time=EventTime;
+mag=EventMag;
+reg=randi([1,Nregion],length(time),1); % randomly
+Mmin=4;
+
+
+%% Conditional intensity and Practise
+A = [-2;-2];
+B = [0.01;0.01];
+C=0.5*ones(Nregion);
+C(1,2)=-0.0;
+C(2,1)=-0.0;
+params=LSRM_PackingParam(A,B,C);
+% AIC0=LSRM_AIC(time,mag,reg,params,Mmin);
+LSRM_PlotResults(LSRM_Estimate(time,mag,reg,params,Mmin),reg,time,mag,Mmin);
+
+%% MLE-Fitting
+[pNew,AICNew]=LSRM_MLE(time,mag,reg,params,Mmin);
+
+%% Plot-Fitting
+LSRM_PlotResults(LSRM_Estimate(time,mag,reg,pNew,Mmin),reg,time,mag,Mmin);
+% AIC=LSRM_AIC(time,mag,reg,pNew,Mmin);
+
+%% RPP-analysis
+[CumInt]=LSRM_Integral_Time(time,mag,reg,pNew,Mmin);
+LSRM_RPP(CumInt,time,reg);
+
+%% Or like this:
+[CumInt]=LSRM_Integral_Region(time,mag,reg,pNew,Mmin);
+LSRM_RPP_Transformed(CumInt,reg);
+##### SOURCE END #####
+--></body></html>

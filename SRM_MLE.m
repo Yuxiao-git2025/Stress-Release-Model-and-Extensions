@@ -1,0 +1,16 @@
+function [pNew,AICNew]=SRM_MLE(time,mag,Mmin,param0)
+Opt = optimoptions('fmincon', ...
+    'Algorithm', 'interior-point', ...
+    'Display', 'iter', ...
+    'MaxIterations', 150, ...
+    'StepTolerance', 1e-5, ...
+    'ConstraintTolerance', 1e-5);
+FuncHandel=@(param) SRM_Estimate(time,mag,Mmin,param,true);
+lb=[-10 1e-10 1e-5];              % Low
+ub=[10 10 10];                   % Up
+[pNew,AICNew]=fmincon(FuncHandel,param0,[],[],[],[],lb,ub,[],Opt);
+pNew=pNew(:)';
+disp('# New parameters');
+disp(pNew);
+
+end
